@@ -1,0 +1,81 @@
+package main
+
+import (
+	"fmt"
+	"strconv"
+)
+
+func rearr(bitstr32 string) string {
+	if len(bitstr32) != 32 {
+		return "length is not 32"
+	}
+	newstr := ""
+
+	for i := 3; i > -1; i-- {
+		newstr += bitstr32[8*i : 8*i+8]
+	}
+
+	return newstr
+
+}
+
+func reformhex(i int64) string {
+	a := strconv.FormatInt(i, 2)
+	return a
+}
+
+func pad(bitstr string) string {
+	strtlen := len(bitstr)
+	bitstr += "1"
+	for len(bitstr)%512 != 448 {
+		bitstr += "0"
+	}
+	lstprt := fmt.Sprintf("%064b", strtlen)
+	bitstr += rearr(lstprt[32:]) + rearr(lstprt[:32])
+	return bitstr
+}
+
+/*
+func getblock(bitstr string) <-chan []string {
+	currpos := 0
+	x := len(bitstr)
+	for currpos < x {
+		currpart := bitstr[currpos : currpos+512]
+		var mysplit make(chan []string)
+		for i := 0; i < 16; i++ {
+			mysplit <- append(mysplit,rearr(currpart[32 * i: i * 32 +32]))
+		
+		}
+		return mysplit
+		currpos += 512
+	}
+	close(mysplit)
+	return nil
+	
+}
+*/
+
+func not32(i int) string {
+	stri := fmt.Sprintf("%032b", i)
+	fmt.Println("stri : ",stri)
+	newstr := ""
+	for i := range stri{
+	fmt.Println(i)
+		if fmt.Sprintf("%d",i) == "0" {
+			newstr += "1"
+		} else {
+			newstr += "0"
+		}
+		
+	} 
+	return newstr
+}
+
+
+
+func main() {
+	fmt.Println(rearr("dasdsadasdsaddasddsaasddasdasdas"))
+	fmt.Println(reformhex(32))
+	fmt.Println(pad("oof"))
+	fmt.Println(not32(23))
+}
