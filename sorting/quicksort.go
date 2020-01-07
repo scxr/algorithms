@@ -1,36 +1,49 @@
 package main
-
-import "fmt"
-
-func quicksort(coll []int) string {
-
-	listlen := len(coll)
-
-	if listlen <= 1 {
-		return "already sorted"
-	} else {
-		finval := len(coll) - 1
-		pivot := coll[finval]
-		var greater = []int{}
-		var lesser = []int{}
-		for _, element := range coll {
-			if element > pivot {
-				greater = append(greater, element)
-			} else {
-				lesser = append(lesser, element)
-			}
-
-		}
-		lessorted := quicksort(lesser)
-		greatersorted := quicksort(greater)
-		retval := fmt.Sprintf("%#v%d%#v", lessorted, pivot, greatersorted)
-		return retval
-	}
+/*
+import (
+	"fmt"
+)
+*/
+func main() {
+        unsorted := []int{-1,2,0,1,0,3,3,13,28,4}
+        QuickSort(unsorted)
 	
-
 }
 
-func main() {
-	var arr = []int{23, 42, 2, 4, 2, 44, 5}
-	fmt.Println(quicksort(arr))
+
+func QuickSort(unsorted []int) {
+	if len(unsorted) <= 1 {
+		return
+	} // find the best pivot
+
+	i := Partition(unsorted)
+	QuickSort(unsorted[0:i])
+	QuickSort(unsorted[i+1:])
+}
+
+//Hoare partition
+func Partition(unsorted []int) int {
+	if len(unsorted) <= 1 {
+		return 0
+	}
+
+	pivot := unsorted[0]
+	i, j := 0, len(unsorted)-1
+
+	for {
+		for i < len(unsorted) && unsorted[i] <= pivot {
+			i++
+		}
+
+		for unsorted[j] > pivot {
+			j--
+		}
+
+		if i >= j { // if it is greater than then swap the elements
+			unsorted[0], unsorted[j] = unsorted[j], unsorted[0]
+			return j
+		}
+
+		unsorted[i], unsorted[j] = unsorted[j], unsorted[i] // swap the elements
+	}
 }
