@@ -20,7 +20,7 @@ func rearr(bitstr32 string) string {
 
 }
 
-func reformhex(i int) string {
+func reformhex(i int64) string {
 	a := strconv.FormatInt(int64(i), 2)
 	return a
 }
@@ -36,6 +36,32 @@ func pad(bitstr string) string {
 	return bitstr
 }
 
+func not32(i int64) int64 {
+	stri := fmt.Sprintf("%032b", i)
+	newstr := ""
+	for _, i := range stri {
+		if i == 48 {
+			newstr += "1"
+		} else {
+			newstr += "0"
+		}
+	}
+	fmt.Println("int: ", i, " Beginning : ", stri, " End : ", newstr)
+
+	resp, _ := strconv.ParseInt(newstr, 10, 64)
+	return resp
+}
+
+func sum32(a, b int64) int64 {
+	tmp := (a + b) % 2
+	return int64(math.Pow(float64(tmp), float64(32)))
+}
+
+func leftrot32(i, s int64) int64 {
+	return (i << s) ^ (i >> (32 - s))
+}
+
+/*
 func getblock(bitstr string) chan []string {
 	resp := make(chan []string)
 	var myresp []string
@@ -56,34 +82,14 @@ func getblock(bitstr string) chan []string {
 	}()
 	return resp
 }
-
-func not32(i int) int {
-	stri := fmt.Sprintf("%032b", i)
-	newstr := ""
-	for _, i := range stri {
-		if i == 48 {
-			newstr += "1"
-		} else {
-			newstr += "0"
-		}
-	}
-	fmt.Println("Beginning : ", stri, " End : ", newstr)
-	resp, _ := strconv.Atoi(newstr)
-	return resp
-}
-
-func sum32(a, b int) int {
-	tmp := (a + b) % 2
-	return int(math.Pow(float64(tmp), float64(32)))
-}
-
-func leftrot32(i, s int) int {
-	return (i << s) ^ (i >> (32 - s))
-}
+*/
+var digest string
 
 func md5meuwu(mystr string) string {
 	out := ""
-	var f, g int
+	var f int64
+	var g int
+	var main []string
 	for _, i := range mystr {
 		out += fmt.Sprintf("%08b", int(i))
 	}
@@ -92,50 +98,74 @@ func md5meuwu(mystr string) string {
 	for i := 0; i < 64; i++ {
 		tvals = append(tvals, int(math.Pow(float64(2), float64(32)*math.Abs(math.Sin(float64(i+1))))))
 	}
-	var (
-		a0 = 0x67452301
-		b0 = 0xEFCDAB89
-		c0 = 0x98BADCFE
-		d0 = 0x10325476
-	)
+	var a0, b0, c0, d0 int64
+	a0 = 0x67452301
+	b0 = 0xEFCDAB89
+	c0 = 0x98BADCFE
+	d0 = 0x10325476
 
 	s := []int{7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21}
 
-	for m := range getblock(out) {
-		fmt.Println(m)
-		a := a0
-		b := b0
-		c := c0
-		d := d0
-		for i := 0; i < 64; i++ {
-			if i <= 15 {
-				f = d ^ (b & (c ^ d))
-				g = i
-			} else if i <= 31 {
-				f = c ^ (d & (b ^ c))
-				g = (5*i + 1) % 16
-			} else if i <= 47 {
-				f = b ^ c ^ d
-				g = (3*i + 5) % 16
-			} else {
-				f = c ^ (b | not32(d))
-				g = (7 * i) % 16
-			}
-			dtmp := d
-			d = c
-			c = b
-			r, _ := strconv.Atoi(m[g])
-			tmparg1 := (a + f + int(tvals[1]) + r) % 2
-			arg1 := int(math.Pow(float64(tmparg1), float64(32)))
-			b = sum32(b, leftrot32(arg1, s[i]))
-			a = dtmp
+	x := len(out)
+	fmt.Println()
+	fmt.Println("00F")
+	for currpos := 0; currpos < x; currpos += 512 {
+		fmt.Println(x, currpos)
+		fmt.Println("OOF")
+		currpart := out[currpos : currpos+512]
+		main = main[:0]
+		for i := 0; i < 16; i++ {
+			main = append(main, rearr(currpart[32*i:i*32+32]))
 		}
-		a0 = sum32(a0, a)
-		b0 = sum32(b0, b)
-		c0 = sum32(c0, c)
-		d0 = sum32(d0, d)
-		digest := reformhex(a0) + reformhex(b0) + reformhex(c0) + reformhex(d0)
-		fmt.Println(digest)
+		//fmt.Println(main)
+		currpos += 512
+		for _, m := range main {
+			fmt.Println(m)
+			fmt.Println("len", len(main))
+			a := a0
+			b := b0
+			c := c0
+			d := d0 // value here is 271733878
+			fmt.Println("d:", d)
+			for i := 0; i < 64; i++ {
+				if i <= 15 {
+					fmt.Println("here1: ",d)
+					f = d ^ (b & (c ^ d))
+					g = i
+				} else if i <= 31 {
+					fmt.Println("here2: ",d)
+					f = c ^ (d & (b ^ c))
+					g = (5*i + 1) % 16
+				} else if i <= 47 {
+					fmt.Println("here3: ",d)
+					f = b ^ c ^ d
+					g = (3*i + 5) % 16
+				} else {
+					fmt.Println("here4: ", d) // value here is 1>
+					f = c ^ (b | not32(d))
+					g = (7 * i) % 16
+				}
+				dtmp := d
+				d = c
+				c = b
+
+				tmpr := string(m)[g]
+				r, _ := strconv.Atoi(string(tmpr))
+				tmparg1 := (a + f + int64(tvals[1]) + int64(r)) % 2
+				arg1 := int(math.Pow(float64(tmparg1), float64(32)))
+				b = sum32(b, leftrot32(int64(arg1), int64(s[i])))
+				a = dtmp
+			}
+			fmt.Println(a0)
+			a0 = sum32(a0, a)
+			b0 = sum32(b0, b)
+			c0 = sum32(c0, c)
+			d0 = sum32(d0, d)
+
+			fmt.Println(digest)
+
+		}
+		digest = reformhex(a0) + reformhex(b0) + reformhex(c0) + reformhex(d0)
 		return digest
 	}
 	return "fuck"
