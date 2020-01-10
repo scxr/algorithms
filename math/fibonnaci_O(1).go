@@ -12,7 +12,7 @@ import (
 
 func fib(n uint64) uint64 {
 	var phi float64 = (1 + math.Sqrt(float64(5))) / 2 // 
-	return uint64(math.Round(math.Pow(phi, float64(n)) / math.Sqrt(float64(5)))) fibn = a^n-b^n / sqrt(5) 
+	return uint64(math.Round(math.Pow(phi, float64(n)) / math.Sqrt(float64(5)))) 
 }
 
 func main() {
